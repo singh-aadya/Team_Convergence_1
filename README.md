@@ -164,6 +164,3 @@ Replace with your trained model when ready.
 | Analyst interface | Risk tier pills · Factor breakdown · Live feed |
 | Batch evaluation | CSV upload → predictions table |
 
----
-
-*Built for BNY Fraud Detection PS1 · GlobalPay Bank · 2024*
