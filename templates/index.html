@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlobalPay — Fraud Intelligence Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN SYSTEM ────────────────────────────────── */
+:root {
+  --bg:          #06080f;
+  --bg2:         #0c1018;
+  --bg3:         #111622;
+  --border:      rgba(255,255,255,0.06);
+  --border2:     rgba(255,255,255,0.12);
+
+  --red:         #FF2D55;
+  --orange:      #FF6B35;
+  --amber:       #FFB800;
+  --green:       #00D4AA;
+  --blue:        #4A9EFF;
+  --purple:      #9B6DFF;
+
+  --text-1:      #F0F2F8;
+  --text-2:      #8892A4;
+  --text-3:      #4A5568;
+
+  --font-head:   'Syne', sans-serif;
+  --font-mono:   'IBM Plex Mono', monospace;
+  --font-body:   'Inter', sans-serif;
+
+  --card-r:      12px;
+  --transition:  0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(74,158,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74,158,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LAYOUT ───────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HEADER ───────────────────────────────────────── */
+header {
+  grid-column: 1 / -1;
+  background: rgba(12,16,24,0.95);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+  color: var(--text-1);
+}
+
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, var(--red), var(--purple));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.logo span { color: var(--red); }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.5px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.3); }
+}
+
+.header-model {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* ── SIDEBAR ──────────────────────────────────────── */
+aside {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+
+.nav-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text-1); }
+.nav-item.active {
+  background: rgba(74,158,255,0.1);
+  border-color: rgba(74,158,255,0.2);
+  color: var(--blue);
+}
+
+.nav-icon {
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  animation: navblink 3s infinite;
+}
+
+@keyframes navblink {
+  0%,90%,100% { opacity:1 }
+  95% { opacity:0.4 }
+}
+
+.sidebar-stats {
+  padding: 16px;
+  margin: 0 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--card-r);
+}
+
+.sidebar-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.sidebar-stat:last-child { border-bottom: none; }
+.sidebar-stat-label { color: var(--text-3); }
+.sidebar-stat-val { font-family: var(--font-mono); font-weight: 600; }
+
+/* ── MAIN ─────────────────────────────────────────── */
+main {
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── PAGE TITLE ───────────────────────────────────── */
+.page-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.4px;
+}
+.page-subtitle {
+  color: var(--text-3);
+  font-size: 12px;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+}
+
+/* ── KPI CARDS ────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.kpi-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--card-r);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent, var(--blue));
+}
+
+.kpi-card:hover { border-color: var(--border2); }
+
+.kpi-label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.kpi-value {
+  font-family: var(--font-head);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-1);
+  letter-spacing: -1px;
+}
+
+.kpi-value.danger { color: var(--red); }
+.kpi-value.warning { color: var(--amber); }
+.kpi-value.success { color: var(--green); }
+
+.kpi-sub {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+.kpi-trend.up   { background: rgba(255,45,85,0.12); color: var(--red); }
+.kpi-trend.down { background: rgba(0,212,170,0.12); color: var(--green); }
+
+/* ── SECTION GRID ─────────────────────────────────── */
+.section-grid {
+  display: grid;
+  gap: 14px;
+}
+.section-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.section-grid.cols-3 { grid-template-columns: 2fr 1fr; }
+
+/* ── CARD ─────────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--card-r);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.2px;
+}
+
+.card-body { padding: 20px; }
+
+.card-action {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--blue);
+  cursor: pointer;
+  padding: 4px 10px;
+  border: 1px solid rgba(74,158,255,0.3);
+  border-radius: 6px;
+  transition: all var(--transition);
+}
+.card-action:hover { background: rgba(74,158,255,0.1); }
+
+/* ── LIVE FEED ────────────────────────────────────── */
+.feed-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  animation: fadeSlide 0.4s ease both;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.feed-item:last-child { border-bottom: none; }
+
+.feed-txn-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-1);
+}
+
+.feed-meta {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+  font-family: var(--font-mono);
+}
+
+.feed-amount {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  text-align: right;
+}
+
+.feed-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: right;
+}
+
+.risk-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.risk-CRITICAL { background: rgba(255,45,85,0.2);   color: var(--red);    border: 1px solid rgba(255,45,85,0.3); }
+.risk-HIGH     { background: rgba(255,107,53,0.2);  color: var(--orange); border: 1px solid rgba(255,107,53,0.3); }
+.risk-MEDIUM   { background: rgba(255,184,0,0.15);  color: var(--amber);  border: 1px solid rgba(255,184,0,0.25); }
+.risk-LOW      { background: rgba(0,212,170,0.1);   color: var(--green);  border: 1px solid rgba(0,212,170,0.2); }
+
+/* ── PREDICT FORM ─────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.field input,
+.field select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color var(--transition);
+  width: 100%;
+  appearance: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(74,158,255,0.1);
+}
+
+.field select option { background: var(--bg3); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all var(--transition);
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: white;
+}
+.btn-primary:hover { background: #3a8de8; transform: translateY(-1px); }
+
+.btn-danger {
+  background: rgba(255,45,85,0.15);
+  color: var(--red);
+  border: 1px solid rgba(255,45,85,0.3);
+}
+.btn-danger:hover { background: rgba(255,45,85,0.25); }
+
+.btn-ghost {
+  background: var(--bg3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text-1); }
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+/* ── RESULT CARD ──────────────────────────────────── */
+#result-card {
+  display: none;
+  margin-top: 16px;
+  background: var(--bg3);
+  border-radius: var(--card-r);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.result-header {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-score-row {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+
+.score-circle-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.score-circle-wrap svg { transform: rotate(-90deg); }
+
+.score-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+}
+
+.score-pct {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+}
+
+.result-meta h3 {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.result-meta p {
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-top: 4px;
+}
+
+.risk-factors-list {
+  padding: 0 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.risk-factor-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.risk-factor-item.high   { background: rgba(255,45,85,0.08); border-left: 2px solid var(--red); }
+.risk-factor-item.medium { background: rgba(255,184,0,0.08); border-left: 2px solid var(--amber); }
+.risk-factor-item.low    { background: rgba(0,212,170,0.06); border-left: 2px solid var(--green); }
+
+.rf-icon { font-size: 14px; margin-top: 1px; }
+.rf-name { font-weight: 600; color: var(--text-1); margin-bottom: 1px; font-family: var(--font-mono); font-size: 11px; }
+.rf-detail { color: var(--text-2); font-size: 11px; }
+
+/* ── BAR CHART ────────────────────────────────────── */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 170px 1fr 50px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-2);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bar-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: right;
+}
+
+/* ── DONUT CHART ──────────────────────────────────── */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.legend-name { color: var(--text-2); display: flex; align-items: center; }
+.legend-count { font-family: var(--font-mono); font-weight: 600; }
+
+/* ── POS BREAKDOWN ────────────────────────────────── */
+.pos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.pos-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+
+.pos-mode {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.pos-rate {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pos-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+/* ── SIMULATE BUTTONS ─────────────────────────────── */
+.sim-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── BATCH UPLOAD ─────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--card-r);
+  padding: 32px;
+  text-align: center;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--blue);
+  background: rgba(74,158,255,0.05);
+}
+
+.upload-icon { font-size: 28px; margin-bottom: 10px; }
+.upload-text { font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
+.upload-hint { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+/* ── MINI TABLE ───────────────────────────────────── */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.mini-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 0 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.mini-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  vertical-align: middle;
+}
+.mini-table tr:last-child td { border-bottom: none; }
+.mini-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ── LOADING ──────────────────────────────────────── */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(74,158,255,0.2);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ALERT BANNER ─────────────────────────────────── */
+.alert-banner {
+  display: none;
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  max-width: 320px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: var(--card-r);
+  padding: 14px 16px;
+  z-index: 999;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+@keyframes slideIn {
+  from { opacity:0; transform: translateX(20px); }
+  to   { opacity:1; transform: translateX(0); }
+}
+
+.alert-banner.show { display: block; }
+
+.alert-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+.alert-body {
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+}
+
+/* ── SCROLLBAR ────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+/* ── UTIL ─────────────────────────────────────────── */
+.text-red    { color: var(--red); }
+.text-orange { color: var(--orange); }
+.text-amber  { color: var(--amber); }
+.text-green  { color: var(--green); }
+.text-blue   { color: var(--blue); }
+.text-mono   { font-family: var(--font-mono); }
+.text-sm     { font-size: 12px; }
+.text-xs     { font-size: 11px; }
+.text-muted  { color: var(--text-3); }
+.flex        { display: flex; }
+.gap-8       { gap: 8px; }
+.gap-12      { gap: 12px; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.mt-4  { margin-top: 4px; }
+.mt-8  { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mb-4  { margin-bottom: 4px; }
+.hidden { display: none !important; }
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .section-grid.cols-2 { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── HEADER ───────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛡</div>
+    GlobalPay <span>Fraud</span> Intelligence
+  </div>
+  <div class="header-right">
+    <div class="header-model text-mono" id="header-model">Loading model...</div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE MONITORING
+    </div>
+  </div>
+</header>
+
+<!-- ── SIDEBAR ──────────────────────────────────────── -->
+<aside>
+  <div class="nav-section">
+    <div class="nav-label">Monitor</div>
+    <div class="nav-item active" onclick="showSection('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showSection('live-feed')">
+      <span class="nav-icon">⚡</span> Live Feed
+      <span class="nav-badge" id="feed-badge">0</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Predict</div>
+    <div class="nav-item" onclick="showSection('single-predict')">
+      <span class="nav-icon">🔍</span> Score Transaction
+    </div>
+    <div class="nav-item" onclick="showSection('batch-predict')">
+      <span class="nav-icon">📁</span> Batch Upload
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Insights</div>
+    <div class="nav-item" onclick="showSection('features')">
+      <span class="nav-icon">📈</span> Feature Importance
+    </div>
+  </div>
+
+  <div style="padding: 0 16px; margin-top: 8px;">
+    <div class="sidebar-stats">
+      <div class="nav-label" style="margin-bottom:10px">Session Stats</div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-label">Analyzed</span>
+        <span class="sidebar-stat-val text-blue" id="sb-total">—</span>
+      </div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-label">Flagged</span>
+        <span class="sidebar-stat-val text-red" id="sb-flagged">—</span>
+      </div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-label">Flag Rate</span>
+        <span class="sidebar-stat-val text-amber" id="sb-rate">—</span>
+      </div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-label">Amount Risk</span>
+        <span class="sidebar-stat-val text-orange" id="sb-amount">—</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ─────────────────────────────────────────── -->
+<main>
+
+  <!-- ── DASHBOARD SECTION ──────────────────────────── -->
+  <div id="section-dashboard">
+    <div>
+      <div class="page-title">Fraud Intelligence Dashboard</div>
+      <div class="page-subtitle">GlobalPay Bank · BNY Fraud Detection System · Real-time monitoring</div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--accent: var(--blue)">
+        <div class="kpi-label">Transactions Analyzed</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub">in current session</div>
+      </div>
+      <div class="kpi-card" style="--accent: var(--red)">
+        <div class="kpi-label">Flagged Fraud</div>
+        <div class="kpi-value danger" id="kpi-flagged">—</div>
+        <div class="kpi-trend up" id="kpi-flag-rate">— %</div>
+      </div>
+      <div class="kpi-card" style="--accent: var(--amber)">
+        <div class="kpi-label">Avg Fraud Score</div>
+        <div class="kpi-value warning" id="kpi-avg-score">—</div>
+        <div class="kpi-sub">mean probability %</div>
+      </div>
+      <div class="kpi-card" style="--accent: var(--orange)">
+        <div class="kpi-label">Amount at Risk</div>
+        <div class="kpi-value" id="kpi-amount" style="font-size:22px">—</div>
+        <div class="kpi-sub">INR · flagged transactions</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="section-grid cols-2">
+
+      <!-- Risk Distribution Donut -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Risk Distribution</div>
+          <div class="text-xs text-muted text-mono">By tier</div>
+        </div>
+        <div class="card-body">
+          <div class="donut-wrap">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle id="donut-track" cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="16"/>
+              <circle id="donut-critical" cx="55" cy="55" r="40" fill="none" stroke="var(--red)"    stroke-width="16" stroke-linecap="round" transform="rotate(-90 55 55)" stroke-dasharray="0 251.2"/>
+              <circle id="donut-high"     cx="55" cy="55" r="40" fill="none" stroke="var(--orange)" stroke-width="16" stroke-linecap="round" transform="rotate(-90 55 55)" stroke-dasharray="0 251.2"/>
+              <circle id="donut-medium"   cx="55" cy="55" r="40" fill="none" stroke="var(--amber)"  stroke-width="16" stroke-linecap="round" transform="rotate(-90 55 55)" stroke-dasharray="0 251.2"/>
+              <circle id="donut-low"      cx="55" cy="55" r="40" fill="none" stroke="var(--green)"  stroke-width="16" stroke-linecap="round" transform="rotate(-90 55 55)" stroke-dasharray="0 251.2"/>
+              <text x="55" y="51" text-anchor="middle" font-family="Syne" font-size="14" font-weight="800" fill="white" id="donut-center-val">—</text>
+              <text x="55" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4A5568">FLAGGED</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item">
+                <div class="legend-name"><div class="legend-dot" style="background:var(--red)"></div>Critical</div>
+                <div class="legend-count text-red" id="leg-critical">0</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-name"><div class="legend-dot" style="background:var(--orange)"></div>High</div>
+                <div class="legend-count text-orange" id="leg-high">0</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-name"><div class="legend-dot" style="background:var(--amber)"></div>Medium</div>
+                <div class="legend-count text-amber" id="leg-medium">0</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-name"><div class="legend-dot" style="background:var(--green)"></div>Low</div>
+                <div class="legend-count text-green" id="leg-low">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POS Mode Breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">POS Mode Fraud Rate</div>
+          <div class="text-xs text-muted text-mono">CHIP / SWIPE / CNP</div>
+        </div>
+        <div class="card-body">
+          <div class="pos-grid" id="pos-breakdown">
+            <div class="pos-card"><div class="pos-mode">CNP</div><div class="pos-rate text-red" id="pos-cnp-rate">—%</div><div class="pos-count" id="pos-cnp-count">—</div></div>
+            <div class="pos-card"><div class="pos-mode">SWIPE</div><div class="pos-rate text-amber" id="pos-swipe-rate">—%</div><div class="pos-count" id="pos-swipe-count">—</div></div>
+            <div class="pos-card"><div class="pos-mode">CHIP</div><div class="pos-rate text-green" id="pos-chip-rate">—%</div><div class="pos-count" id="pos-chip-count">—</div></div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="text-xs text-muted text-mono mb-4">Merchant Category Flags</div>
+            <div id="merchant-bars" class="bar-chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent flagged transactions on dashboard -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Flagged Transactions</div>
+        <div class="card-action" onclick="refreshFeed()">↺ Refresh</div>
+      </div>
+      <div class="card-body" style="padding:0 20px">
+        <div id="dashboard-feed">
+          <div class="text-muted text-mono text-xs" style="padding:16px 0">Loading transactions...</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /dashboard -->
+
+  <!-- ── LIVE FEED SECTION ───────────────────────────── -->
+  <div id="section-live-feed" class="hidden">
+    <div>
+      <div class="page-title">Live Transaction Feed</div>
+      <div class="page-subtitle">Real-time scoring · Auto-refreshes every 8 seconds</div>
+    </div>
+
+    <div class="sim-row" style="margin-top:4px">
+      <button class="btn btn-danger" onclick="simulate('fraud')">⚠ Simulate Fraud</button>
+      <button class="btn btn-ghost" onclick="simulate('legit')">✓ Simulate Legit</button>
+      <button class="btn btn-ghost" onclick="simulate('random')">⚡ Random</button>
+      <label style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;color:var(--text-3);margin-left:auto;cursor:pointer">
+        <input type="checkbox" id="auto-refresh" checked onchange="toggleAutoRefresh(this.checked)"> Auto-refresh
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Transactions</div>
+        <div style="display:flex;gap:8px">
+          <div class="card-action" id="filter-all"    onclick="setFilter('all')"   style="color:var(--blue)">All</div>
+          <div class="card-action" id="filter-fraud"  onclick="setFilter('fraud')" >Fraud Only</div>
+        </div>
+      </div>
+      <div style="padding: 0 20px">
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Category</th>
+              <th>POS</th>
+              <th>Country</th>
+              <th>Amount (₹)</th>
+              <th>Velocity</th>
+              <th>Fraud %</th>
+              <th>Risk</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="feed-table-body">
+            <tr><td colspan="9" style="color:var(--text-3);padding:20px 8px">Loading feed...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /live-feed -->
+
+  <!-- ── SCORE TRANSACTION SECTION ──────────────────── -->
+  <div id="section-single-predict" class="hidden">
+    <div>
+      <div class="page-title">Score a Transaction</div>
+      <div class="page-subtitle">Enter transaction details · Get instant fraud probability</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Transaction Details</div>
+        <div style="display:flex;gap:8px">
+          <div class="card-action" onclick="fillFraud()">⚠ Fill Fraud Example</div>
+          <div class="card-action" onclick="fillLegit()">✓ Fill Legit Example</div>
+          <div class="card-action" onclick="clearForm()">✕ Clear</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Transaction Amount (₹)</label>
+            <input type="number" id="f-amount" placeholder="e.g. 2500.00" step="0.01">
+          </div>
+          <div class="field">
+            <label>Merchant Category</label>
+            <select id="f-merchant">
+              <option value="">— select —</option>
+              <option value="grocery">Grocery</option>
+              <option value="fuel">Fuel</option>
+              <option value="online_retail">Online Retail</option>
+              <option value="restaurant">Restaurant</option>
+              <option value="travel">Travel</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="healthcare">Healthcare</option>
+              <option value="utilities">Utilities</option>
+              <option value="jewellery">Jewellery</option>
+              <option value="electronics">Electronics</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>POS Entry Mode</label>
+            <select id="f-pos">
+              <option value="">— select —</option>
+              <option value="CHIP">CHIP (EMV)</option>
+              <option value="SWIPE">SWIPE (Magnetic)</option>
+              <option value="CNP">CNP (Card Not Present)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Country Code</label>
+            <input type="text" id="f-country" placeholder="e.g. IN, US, AE" maxlength="2">
+          </div>
+          <div class="field">
+            <label>Credit Limit (₹)</label>
+            <input type="number" id="f-limit" placeholder="e.g. 100000">
+          </div>
+          <div class="field">
+            <label>Avg Txn Amount 30d (₹)</label>
+            <input type="number" id="f-avg" placeholder="e.g. 150.00" step="0.01">
+          </div>
+          <div class="field">
+            <label>Std Dev Amount 30d (₹)</label>
+            <input type="number" id="f-std" placeholder="e.g. 300.00" step="0.01">
+          </div>
+          <div class="field">
+            <label>Velocity (Last 1 Hour)</label>
+            <input type="number" id="f-vel1h" placeholder="e.g. 1" min="0">
+          </div>
+          <div class="field">
+            <label>Velocity (Last 24 Hours)</label>
+            <input type="number" id="f-vel24h" placeholder="e.g. 4" min="0">
+          </div>
+          <div class="field">
+            <label>Distance from Home (km)</label>
+            <input type="number" id="f-dist" placeholder="e.g. 120.5" step="0.1">
+          </div>
+          <div class="field">
+            <label>Card Age (Days)</label>
+            <input type="number" id="f-cardage" placeholder="e.g. 365" min="0">
+          </div>
+          <div class="field">
+            <label>Transaction Hour (0–23)</label>
+            <input type="number" id="f-hour" placeholder="e.g. 14" min="0" max="23">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
+          <button class="btn btn-primary" id="predict-btn" onclick="predictSingle()">
+            🔍 Score Transaction
+          </button>
+          <div id="predict-loading" class="hidden" style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;color:var(--text-3)">
+            <div class="spinner"></div> Scoring...
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result-card">
+          <div class="result-header">
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-3)">SCORING RESULT</div>
+            <div id="result-txnid" style="font-family:var(--font-mono);font-size:11px;color:var(--text-3)"></div>
+          </div>
+          <div class="result-score-row">
+            <div class="score-circle-wrap">
+              <svg width="90" height="90" viewBox="0 0 90 90">
+                <circle cx="45" cy="45" r="36" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+                <circle id="score-arc" cx="45" cy="45" r="36" fill="none" stroke="var(--green)" stroke-width="10"
+                  stroke-linecap="round" stroke-dasharray="0 226.2" stroke-dashoffset="0"/>
+              </svg>
+              <div class="score-text">
+                <div class="score-pct" id="score-pct-text">0%</div>
+                <div class="score-label">FRAUD</div>
+              </div>
+            </div>
+            <div class="result-meta">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3 id="result-verdict">—</h3>
+                <div class="risk-pill" id="result-risk-pill"></div>
+              </div>
+              <p id="result-model">—</p>
+              <div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">
+                <div style="font-family:var(--font-mono);font-size:11px">
+                  <div style="color:var(--text-3)">RAW SCORE</div>
+                  <div id="result-raw-score" style="color:var(--text-1);font-size:13px;font-weight:600">—</div>
+                </div>
+                <div style="font-family:var(--font-mono);font-size:11px">
+                  <div style="color:var(--text-3)">THRESHOLD</div>
+                  <div style="color:var(--text-1);font-size:13px;font-weight:600">0.35</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 20px 8px;font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:0.5px;text-transform:uppercase">Risk Factors</div>
+          <div class="risk-factors-list" id="result-risk-factors"></div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /single predict -->
+
+  <!-- ── BATCH PREDICT SECTION ──────────────────────── -->
+  <div id="section-batch-predict" class="hidden">
+    <div>
+      <div class="page-title">Batch Transaction Scoring</div>
+      <div class="page-subtitle">Upload test_transactions.csv · Get predictions for all rows</div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="upload-zone" id="upload-zone"
+          onclick="document.getElementById('csv-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)">
+          <div class="upload-icon">📂</div>
+          <div class="upload-text">Drop your CSV here or click to browse</div>
+          <div class="upload-hint">test_transactions.csv · Same schema as training data</div>
+        </div>
+        <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="uploadCSV(this.files[0])">
+
+        <div id="batch-loading" class="hidden" style="text-align:center;padding:24px;font-family:var(--font-mono);font-size:12px;color:var(--text-3)">
+          <div class="spinner" style="margin:0 auto 10px;width:24px;height:24px;border-width:3px"></div>
+          Scoring transactions...
+        </div>
+
+        <div id="batch-results" class="hidden" style="margin-top:16px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+            <div class="kpi-card" style="--accent:var(--blue)">
+              <div class="kpi-label">Total</div>
+              <div class="kpi-value" id="b-total">—</div>
+            </div>
+            <div class="kpi-card" style="--accent:var(--red)">
+              <div class="kpi-label">Flagged</div>
+              <div class="kpi-value danger" id="b-flagged">—</div>
+            </div>
+            <div class="kpi-card" style="--accent:var(--amber)">
+              <div class="kpi-label">Flag Rate</div>
+              <div class="kpi-value warning" id="b-rate">—</div>
+            </div>
+            <div class="kpi-card" style="--accent:var(--green)">
+              <div class="kpi-label">Clean</div>
+              <div class="kpi-value success" id="b-clean">—</div>
+            </div>
+          </div>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Fraud Prob %</th>
+                <th>Risk Tier</th>
+                <th>Predicted</th>
+              </tr>
+            </thead>
+            <tbody id="batch-table" style="max-height:300px;overflow-y:auto"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /batch predict -->
+
+  <!-- ── FEATURES SECTION ────────────────────────────── -->
+  <div id="section-features" class="hidden">
+    <div>
+      <div class="page-title">Feature Importance</div>
+      <div class="page-subtitle">SHAP-derived feature weights · What drives fraud predictions</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Top 13 Features — Mean |SHAP| Impact</div>
+        <div class="text-xs text-muted text-mono">Higher = stronger influence on fraud score</div>
+      </div>
+      <div class="card-body">
+        <div id="feature-bars" class="bar-chart"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Feature Descriptions</div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table class="mini-table">
+          <thead>
+            <tr><th>#</th><th>Feature</th><th>Description</th><th>Type</th></tr>
+          </thead>
+          <tbody id="feature-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /features -->
+
+</main>
+</div>
+
+<!-- Alert Banner -->
+<div class="alert-banner" id="alert-banner">
+  <div class="alert-title">🚨 Critical Fraud Alert</div>
+  <div class="alert-body" id="alert-body">—</div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+let currentFilter  = 'all';
+let autoRefreshTimer = null;
+let feedCount      = 0;
+const API = '';   // same-origin; change to 'http://localhost:5000' if running separately
+
+// ── NAVIGATION ─────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('main > div[id^="section-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('section-' + name).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event?.currentTarget?.classList.add('active');
+  if (name === 'features') loadFeatures();
+}
+
+// ── STATS POLLING ──────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(API + '/api/stats');
+    const d = await r.json();
+    if (d.error) return;
+
+    document.getElementById('kpi-total').textContent    = d.total_analyzed;
+    document.getElementById('kpi-flagged').textContent  = d.flagged;
+    document.getElementById('kpi-flag-rate').textContent= d.flag_rate_pct + '%';
+    document.getElementById('kpi-avg-score').textContent= d.avg_fraud_score + '%';
+    document.getElementById('kpi-amount').textContent   = '₹' + formatNum(d.amount_at_risk_inr);
+    document.getElementById('header-model').textContent = d.model_name;
+
+    // Sidebar
+    document.getElementById('sb-total').textContent   = d.total_analyzed;
+    document.getElementById('sb-flagged').textContent = d.flagged;
+    document.getElementById('sb-rate').textContent    = d.flag_rate_pct + '%';
+    document.getElementById('sb-amount').textContent  = '₹' + formatNum(d.amount_at_risk_inr);
+
+    // Risk donut
+    const rd  = d.risk_distribution;
+    const tot = rd.CRITICAL + rd.HIGH + rd.MEDIUM + rd.LOW;
+    document.getElementById('leg-critical').textContent = rd.CRITICAL;
+    document.getElementById('leg-high').textContent     = rd.HIGH;
+    document.getElementById('leg-medium').textContent   = rd.MEDIUM;
+    document.getElementById('leg-low').textContent      = rd.LOW;
+    document.getElementById('donut-center-val').textContent = d.flagged;
+    updateDonut(rd, tot);
+
+    // POS breakdown
+    const pos = d.pos_fraud_breakdown;
+    ['CNP','SWIPE','CHIP'].forEach(mode => {
+      const p = pos[mode] || {rate:0, total:0, fraud:0};
+      document.getElementById('pos-' + mode.toLowerCase() + '-rate').textContent = p.rate + '%';
+      document.getElementById('pos-' + mode.toLowerCase() + '-count').textContent = p.fraud + '/' + p.total + ' flagged';
+    });
+
+    // Merchant bars
+    renderMerchantBars(d.merchant_fraud_counts || {});
+
+  } catch(e) { console.warn('Stats load failed:', e); }
+}
+
+function updateDonut(rd, tot) {
+  if (tot === 0) return;
+  const circ = 251.2;
+  const segments = [
+    { id: 'donut-critical', val: rd.CRITICAL, color: 'var(--red)', offset: 0 },
+    { id: 'donut-high',     val: rd.HIGH,     color: 'var(--orange)', offset: 0 },
+    { id: 'donut-medium',   val: rd.MEDIUM,   color: 'var(--amber)', offset: 0 },
+    { id: 'donut-low',      val: rd.LOW,      color: 'var(--green)', offset: 0 },
+  ];
+  let cumulative = 0;
+  segments.forEach(seg => {
+    const arc = (seg.val / tot) * circ;
+    const el  = document.getElementById(seg.id);
+    el.style.strokeDasharray  = `${arc} ${circ - arc}`;
+    el.style.strokeDashoffset = -(cumulative);
+    el.style.stroke = seg.color;
+    cumulative += arc;
+  });
+}
+
+function renderMerchantBars(counts) {
+  const container = document.getElementById('merchant-bars');
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,6);
+  if (!sorted.length) { container.innerHTML = '<div class="text-xs text-muted">No flagged merchants yet</div>'; return; }
+  const max = sorted[0][1] || 1;
+  container.innerHTML = sorted.map(([cat, cnt]) => `
+    <div class="bar-row">
+      <div class="bar-label">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/max*100)}%"></div></div>
+      <div class="bar-val">${cnt}</div>
+    </div>`).join('');
+}
+
+// ── LIVE FEED ──────────────────────────────────────────────────
+async function loadFeed(filter) {
+  try {
+    const r = await fetch(API + `/api/recent?filter=${filter || currentFilter}&limit=20`);
+    const txns = await r.json();
+    if (!Array.isArray(txns)) return;
+
+    feedCount = txns.length;
+    document.getElementById('feed-badge').textContent = txns.filter(t => t.is_fraud_predicted).length;
+
+    // Dashboard mini-feed (fraud only)
+    const dashFeed = document.getElementById('dashboard-feed');
+    const fraudTxns = txns.filter(t => t.is_fraud_predicted).slice(0,8);
+    if (fraudTxns.length === 0) {
+      dashFeed.innerHTML = '<div class="text-muted text-mono text-xs" style="padding:16px 0">No fraud flagged yet · Monitoring active</div>';
+    } else {
+      dashFeed.innerHTML = fraudTxns.map(t => `
+        <div class="feed-item">
+          <div>
+            <div class="feed-txn-id">${t.transaction_id}</div>
+            <div class="feed-meta">${t.merchant_category} · ${t.pos_entry_mode} · ${t.country_code}</div>
+          </div>
+          <div class="feed-amount">₹${t.transaction_amount_inr.toLocaleString('en-IN',{minimumFractionDigits:2})}</div>
+          <div class="risk-pill risk-${t.risk_tier}">${t.risk_tier}</div>
+          <div class="feed-time">${t.timestamp_display}</div>
+        </div>`).join('');
+    }
+
+    // Full feed table
+    const tbody = document.getElementById('feed-table-body');
+    tbody.innerHTML = txns.map(t => `
+      <tr>
+        <td>${t.transaction_id}</td>
+        <td>${t.merchant_category}</td>
+        <td><span style="font-family:var(--font-mono);font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05)">${t.pos_entry_mode}</span></td>
+        <td>${t.country_code}${t.is_international ? ' 🌐' : ''}</td>
+        <td style="text-align:right">₹${t.transaction_amount_inr.toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+        <td style="text-align:center">${t.velocity_last_1h}</td>
+        <td style="text-align:right;font-family:var(--font-mono)">${t.fraud_probability}%</td>
+        <td><span class="risk-pill risk-${t.risk_tier}">${t.risk_tier}</span></td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-3)">${t.timestamp_display}</td>
+      </tr>`).join('');
+
+  } catch(e) { console.warn('Feed load failed:', e); }
+}
+
+async function refreshFeed() { await loadFeed(currentFilter); await loadStats(); }
+
+function setFilter(f) {
+  currentFilter = f;
+  document.getElementById('filter-all').style.color   = f==='all'   ? 'var(--blue)'  : 'var(--text-3)';
+  document.getElementById('filter-fraud').style.color = f==='fraud' ? 'var(--blue)'  : 'var(--text-3)';
+  loadFeed(f);
+}
+
+function toggleAutoRefresh(on) {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (on) autoRefreshTimer = setInterval(() => { loadFeed(currentFilter); loadStats(); }, 8000);
+}
+
+// ── SIMULATE ───────────────────────────────────────────────────
+async function simulate(type) {
+  try {
+    const r = await fetch(API + `/api/simulate?type=${type}`, {method:'POST'});
+    const d = await r.json();
+    if (d.risk_tier === 'CRITICAL' || d.risk_tier === 'HIGH') {
+      showAlert(d);
+    }
+    await loadFeed(currentFilter);
+    await loadStats();
+  } catch(e) { console.warn('Simulate failed:', e); }
+}
+
+function showAlert(txn) {
+  const b = document.getElementById('alert-banner');
+  document.getElementById('alert-body').textContent =
+    `${txn.transaction_id} · ₹${txn.transaction_amount_inr?.toLocaleString('en-IN')} · ${txn.merchant_category} · ${txn.fraud_probability?.toFixed(1)}% fraud probability`;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 5000);
+}
+
+// ── SINGLE PREDICT ─────────────────────────────────────────────
+function fillFraud() {
+  document.getElementById('f-amount').value   = 12000;
+  document.getElementById('f-merchant').value = 'electronics';
+  document.getElementById('f-pos').value      = 'CNP';
+  document.getElementById('f-country').value  = 'US';
+  document.getElementById('f-limit').value    = 75000;
+  document.getElementById('f-avg').value      = 120;
+  document.getElementById('f-std').value      = 300;
+  document.getElementById('f-vel1h').value    = 6;
+  document.getElementById('f-vel24h').value   = 10;
+  document.getElementById('f-dist').value     = 180;
+  document.getElementById('f-cardage').value  = 22;
+  document.getElementById('f-hour').value     = 2;
+}
+
+function fillLegit() {
+  document.getElementById('f-amount').value   = 280;
+  document.getElementById('f-merchant').value = 'grocery';
+  document.getElementById('f-pos').value      = 'CHIP';
+  document.getElementById('f-country').value  = 'IN';
+  document.getElementById('f-limit').value    = 200000;
+  document.getElementById('f-avg').value      = 250;
+  document.getElementById('f-std').value      = 200;
+  document.getElementById('f-vel1h').value    = 1;
+  document.getElementById('f-vel24h').value   = 3;
+  document.getElementById('f-dist').value     = 4;
+  document.getElementById('f-cardage').value  = 920;
+  document.getElementById('f-hour').value     = 14;
+}
+
+function clearForm() {
+  ['f-amount','f-merchant','f-pos','f-country','f-limit','f-avg','f-std','f-vel1h','f-vel24h','f-dist','f-cardage','f-hour']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('result-card').style.display = 'none';
+}
+
+async function predictSingle() {
+  const payload = {
+    transaction_amount_inr: parseFloat(document.getElementById('f-amount').value) || 0,
+    merchant_category:      document.getElementById('f-merchant').value || 'grocery',
+    pos_entry_mode:         document.getElementById('f-pos').value || 'CHIP',
+    country_code:           document.getElementById('f-country').value || 'IN',
+    credit_limit_inr:       parseFloat(document.getElementById('f-limit').value) || 100000,
+    avg_txn_amount_30d:     parseFloat(document.getElementById('f-avg').value) || 150,
+    std_txn_amount_30d:     parseFloat(document.getElementById('f-std').value) || 300,
+    velocity_last_1h:       parseInt(document.getElementById('f-vel1h').value) || 1,
+    velocity_last_24h:      parseInt(document.getElementById('f-vel24h').value) || 3,
+    distance_from_home_km:  parseFloat(document.getElementById('f-dist').value) || 100,
+    card_age_days:          parseInt(document.getElementById('f-cardage').value) || 365,
+    transaction_hour:       parseInt(document.getElementById('f-hour').value) ?? 12,
+    is_international:       document.getElementById('f-country').value !== 'IN' ? 1 : 0,
+  };
+
+  const btn = document.getElementById('predict-btn');
+  const loading = document.getElementById('predict-loading');
+  btn.disabled = true;
+  loading.classList.remove('hidden');
+
+  try {
+    const r = await fetch(API + '/api/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (d.error) { alert('Error: ' + d.error); return; }
+    renderResult(d);
+    if (d.risk_tier === 'CRITICAL') showAlert(d);
+  } catch(e) {
+    alert('Connection failed. Is Flask running on port 5000?');
+  } finally {
+    btn.disabled = false;
+    loading.classList.add('hidden');
+  }
+}
+
+function renderResult(d) {
+  const rc = document.getElementById('result-card');
+  rc.style.display = 'block';
+
+  const pct   = d.fraud_probability;
+  const circ  = 226.2;
+  const arc   = (pct / 100) * circ;
+  const scoreArc  = document.getElementById('score-arc');
+  const color = pct >= 70 ? 'var(--red)' : pct >= 45 ? 'var(--orange)' : pct >= 20 ? 'var(--amber)' : 'var(--green)';
+
+  scoreArc.style.strokeDasharray = `${arc} ${circ - arc}`;
+  scoreArc.style.stroke = color;
+  document.getElementById('score-pct-text').textContent = pct.toFixed(1) + '%';
+  document.getElementById('score-pct-text').style.color = color;
+
+  const verdictEl = document.getElementById('result-verdict');
+  if (d.is_fraud_predicted) {
+    verdictEl.textContent = '⚠ Fraud Detected';
+    verdictEl.style.color = color;
+  } else {
+    verdictEl.textContent = '✓ Transaction Clean';
+    verdictEl.style.color = 'var(--green)';
+  }
+
+  const pill = document.getElementById('result-risk-pill');
+  pill.textContent = d.risk_tier;
+  pill.className = 'risk-pill risk-' + d.risk_tier;
+
+  document.getElementById('result-model').textContent = 'Model: ' + d.model_used;
+  document.getElementById('result-raw-score').textContent = d.fraud_score?.toFixed(4);
+  document.getElementById('result-txnid').textContent = d.transaction_id || '';
+
+  const rfList = document.getElementById('result-risk-factors');
+  rfList.innerHTML = (d.risk_factors || []).map(rf => `
+    <div class="risk-factor-item ${rf.severity}">
+      <div class="rf-icon">${rf.severity==='high' ? '🔴' : rf.severity==='medium' ? '🟡' : '🟢'}</div>
+      <div>
+        <div class="rf-name">${rf.factor}</div>
+        <div class="rf-detail">${rf.detail}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── BATCH UPLOAD ───────────────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) uploadCSV(file);
+}
+
+async function uploadCSV(file) {
+  if (!file) return;
+  document.getElementById('batch-loading').classList.remove('hidden');
+  document.getElementById('batch-results').classList.add('hidden');
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const r = await fetch(API + '/api/predict/batch', {method:'POST', body: form});
+    const d = await r.json();
+    if (d.error) { alert('Error: ' + d.error); return; }
+
+    document.getElementById('b-total').textContent   = d.total_transactions;
+    document.getElementById('b-flagged').textContent = d.flagged;
+    document.getElementById('b-rate').textContent    = d.flag_rate_pct + '%';
+    document.getElementById('b-clean').textContent   = d.total_transactions - d.flagged;
+
+    const tbody = document.getElementById('batch-table');
+    tbody.innerHTML = d.predictions.slice(0,50).map(p => `
+      <tr>
+        <td>${p.transaction_id}</td>
+        <td style="font-family:var(--font-mono);text-align:right">${p.fraud_probability}%</td>
+        <td><span class="risk-pill risk-${p.risk_tier}">${p.risk_tier}</span></td>
+        <td><span style="font-family:var(--font-mono);font-size:11px;color:${p.is_fraud_predicted?'var(--red)':'var(--green)'}">${p.is_fraud_predicted ? '⚠ FRAUD' : '✓ CLEAN'}</span></td>
+      </tr>`).join('');
+
+    document.getElementById('batch-results').classList.remove('hidden');
+  } catch(e) {
+    alert('Upload failed. Check Flask is running on port 5000.');
+  } finally {
+    document.getElementById('batch-loading').classList.add('hidden');
+  }
+}
+
+// ── FEATURE IMPORTANCE ─────────────────────────────────────────
+async function loadFeatures() {
+  try {
+    const r = await fetch(API + '/api/feature-importance');
+    const data = await r.json();
+
+    const max = data[0]?.importance || 1;
+
+    // Bar chart
+    document.getElementById('feature-bars').innerHTML = data.map(f => `
+      <div class="bar-row">
+        <div class="bar-label">${f.feature}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(f.importance/max*100)}%"></div></div>
+        <div class="bar-val">${(f.importance*100).toFixed(1)}%</div>
+      </div>`).join('');
+
+    // Feature table
+    const types = {
+      'amount_zscore':'Engineered','amount_vs_avg_ratio':'Engineered','amount_to_limit_ratio':'Engineered',
+      'velocity_amount_interaction':'Engineered','is_night_transaction':'Engineered','is_new_card':'Engineered',
+      'cnp_high_velocity':'Engineered','distance_international_mismatch':'Engineered','credit_utilization_spike':'Engineered',
+      'is_weekend':'Engineered','merchant_fraud_rate':'Target Encoded','country_fraud_rate':'Target Encoded',
+      'pos_CNP':'One-Hot','pos_SWIPE':'One-Hot',
+    };
+
+    document.getElementById('feature-table').innerHTML = data.map((f, i) => `
+      <tr>
+        <td style="font-family:var(--font-mono);color:var(--text-3)">${i+1}</td>
+        <td style="font-family:var(--font-mono);color:var(--blue)">${f.feature}</td>
+        <td>${f.description}</td>
+        <td><span style="font-family:var(--font-mono);font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(74,158,255,0.1);color:var(--blue)">${types[f.feature]||'Original'}</span></td>
+      </tr>`).join('');
+
+  } catch(e) { console.warn('Features load failed:', e); }
+}
+
+// ── UTILS ──────────────────────────────────────────────────────
+function formatNum(n) {
+  if (n >= 10000000) return (n/10000000).toFixed(1) + 'Cr';
+  if (n >= 100000)   return (n/100000).toFixed(1) + 'L';
+  if (n >= 1000)     return (n/1000).toFixed(1) + 'K';
+  return Math.round(n).toLocaleString('en-IN');
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+(async function init() {
+  await loadStats();
+  await loadFeed('all');
+  toggleAutoRefresh(true);
+})();
+</script>
+</body>
+</html>
